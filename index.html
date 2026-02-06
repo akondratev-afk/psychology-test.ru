@@ -2,1041 +2,1132 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Интегральный тип личности — тест</title>
-
-  <!-- PDF capture libs (CDN) -->
-  <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <style>
     :root{
-      --bg: #0b0c10;
-      --card: rgba(255,255,255,.06);
-      --card2: rgba(255,255,255,.08);
-      --stroke: rgba(255,255,255,.14);
-      --stroke2: rgba(255,255,255,.22);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.62);
-      --muted2: rgba(255,255,255,.45);
-      --accent: #7c5cff;
-      --ok: #57e39b;
-      --danger: #ff6b6b;
+      --bg: #F5F5F7;
+      --card: rgba(255,255,255,0.86);
+      --text: #1D1D1F;
+      --muted: #6E6E73;
+      --border: rgba(0,0,0,0.10);
+      --shadow: 0 14px 40px rgba(0,0,0,0.10);
+      --shadow2: 0 10px 26px rgba(0,0,0,0.10);
+      --accent: #007AFF;
+      --danger: #FF3B30;
 
-      --r-lg: 18px;
-      --r-md: 14px;
-      --r-sm: 999px;
+      --r-xl: 28px;
+      --r-lg: 22px;
+      --r-md: 16px;
+      --r-pill: 999px;
 
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --maxw: 980px;
+      --ease: cubic-bezier(.2,.8,.2,1);
+      --focus: 0 0 0 4px rgba(0,122,255,.22);
+    }
+
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg: #0B0B0D;
+        --card: rgba(24,24,28,0.78);
+        --text: #F5F5F7;
+        --muted: #A1A1A6;
+        --border: rgba(255,255,255,0.12);
+        --shadow: 0 18px 60px rgba(0,0,0,0.55);
+        --shadow2: 0 12px 34px rgba(0,0,0,0.55);
+        --accent: #0A84FF;
+        --focus: 0 0 0 4px rgba(10,132,255,.28);
+      }
     }
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
-      color: var(--text);
+      color:var(--text);
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display","SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .bgGlow{
+      position:fixed; inset:0;
+      pointer-events:none;
       background:
-        radial-gradient(900px 500px at 20% -10%, rgba(124,92,255,.22), transparent 55%),
-        radial-gradient(900px 500px at 110% 10%, rgba(87,227,155,.12), transparent 55%),
-        radial-gradient(900px 600px at 40% 120%, rgba(255,107,107,.10), transparent 55%),
-        var(--bg);
+        radial-gradient(900px 600px at 20% 10%, rgba(0,122,255,.10), transparent 55%),
+        radial-gradient(850px 560px at 85% 20%, rgba(88,86,214,.10), transparent 58%),
+        radial-gradient(900px 640px at 40% 92%, rgba(255,45,85,.08), transparent 55%);
+      opacity:.8;
+      filter: saturate(110%);
     }
 
-    .wrap{
-      max-width: var(--maxw);
-      margin: 0 auto;
-      padding: 24px 16px 48px;
-    }
-
-    header{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:16px;
-    }
-
-    .title{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      min-width: 240px;
-    }
-    .title h1{
-      margin:0;
-      font-size: 18px;
-      letter-spacing: .2px;
-      font-weight: 650;
-    }
-    .title p{
-      margin:0;
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.35;
-    }
-
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
-      border: 1px solid var(--stroke);
-      border-radius: var(--r-lg);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-    }
-
-    .topbar{
-      padding: 14px 14px 12px;
+    .safe{
+      min-height:100%;
+      padding:
+        max(20px, env(safe-area-inset-top))
+        max(20px, env(safe-area-inset-right))
+        max(20px, env(safe-area-inset-bottom))
+        max(20px, env(safe-area-inset-left));
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
+      justify-content:center;
     }
 
-    .fields{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      flex: 1;
-    }
+    .app{ width:min(880px, 100%); }
 
-    .field{
+    .screen{ display:none; }
+    .screen.active{ display:block; }
+
+    @keyframes screenIn{
+      from{ opacity:0; transform: translateY(14px) scale(.992); }
+      to{ opacity:1; transform: translateY(0) scale(1); }
+    }
+    @keyframes screenOut{
+      from{ opacity:1; transform: translateY(0) scale(1); }
+      to{ opacity:0; transform: translateY(14px) scale(.992); }
+    }
+    .animIn{ animation: screenIn .38s var(--ease) both; }
+    .animOut{ animation: screenOut .26s var(--ease) both; }
+
+    /* Start */
+    .startWrap{
+      min-height: calc(100vh - 80px);
       display:flex;
       flex-direction:column;
-      gap:6px;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      gap:14px;
     }
-    label{
-      font-size: 12px;
-      color: var(--muted2);
+    .brandTitle{
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      margin:0;
+    }
+    .brandSub{
+      max-width: 560px;
+      color:var(--muted);
+      font-size: 14px;
+      line-height:1.35;
+      margin:0;
+    }
+    .startButton{
+      border: 1px solid rgba(255,255,255,.14);
+      background: var(--accent);
+      color: #fff;
+      border-radius: var(--r-pill);
+      padding: 14px 26px;
+      font-weight: 800;
+      font-size: 18px;
+      cursor:pointer;
+      box-shadow: 0 14px 34px rgba(0,122,255,.26);
+      transform: translateY(0);
+      transition: transform .18s var(--ease), box-shadow .18s var(--ease), filter .18s var(--ease);
       user-select:none;
     }
-    input{
-      width:100%;
-      background: rgba(0,0,0,.22);
-      border: 1px solid var(--stroke);
-      color: var(--text);
-      border-radius: 12px;
-      padding: 11px 12px;
-      outline:none;
-      font-size: 14px;
-      transition: border-color .15s ease, transform .15s ease, background .15s ease;
-    }
-    input:focus{
-      border-color: rgba(124,92,255,.55);
-      background: rgba(0,0,0,.28);
-    }
+    .startButton:hover{ transform: translateY(-1px); filter: brightness(1.02); box-shadow: 0 18px 44px rgba(0,122,255,.30); }
+    .startButton:active{ transform: translateY(0) scale(.99); }
 
-    .progressWrap{
-      width: 260px;
-      min-width: 220px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      align-items:flex-end;
-    }
-
-    .progressMeta{
-      display:flex;
-      gap:10px;
-      align-items:baseline;
-      justify-content:flex-end;
-      width:100%;
-    }
-    .metaSmall{
-      font-size: 12px;
-      color: var(--muted);
-      white-space:nowrap;
-    }
-    .bar{
-      width:100%;
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
+    /* Card */
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       overflow:hidden;
     }
-    .bar > i{
-      display:block;
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, rgba(124,92,255,.95), rgba(87,227,155,.85));
-      border-radius: 999px;
-      transition: width .35s ease;
+
+    .cardTop{
+      padding: 18px 18px 12px 18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:14px;
     }
 
-    main{
-      margin-top: 14px;
-      padding: 18px;
-    }
-
-    .qa{
+    .titleBlock{
       display:flex;
       flex-direction:column;
-      gap:14px;
-      padding: 16px;
+      gap:6px;
+      min-width: 0;
+    }
+
+    .cardTitle{
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      margin:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .cardMeta{
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+
+    .progressWrap{ padding: 0 18px 16px 18px; }
+    .progress{
+      height: 8px;
+      border-radius: var(--r-pill);
+      background: rgba(0,0,0,.06);
+      border: 1px solid var(--border);
+      overflow:hidden;
+    }
+    @media (prefers-color-scheme: dark){
+      .progress{ background: rgba(255,255,255,.06); }
+    }
+    .progress > div{
+      height:100%;
+      width:0%;
+      background: var(--accent);
+      border-radius: var(--r-pill);
+      transition: width .34s var(--ease);
+    }
+
+    .section{
+      border-top: 1px solid var(--border);
+      padding: 16px 18px 18px 18px;
+    }
+
+    .inputs{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 560px){
+      .inputs{ grid-template-columns: 1fr; }
+    }
+
+    .field{ display:flex; flex-direction:column; gap:6px; }
+    .label{
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+
+    input{
+      border-radius: var(--r-md);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.65);
+      padding: 12px 12px;
+      font-size: 14px;
+      color: var(--text);
+      outline:none;
+      transition: box-shadow .18s var(--ease), border-color .18s var(--ease);
+    }
+    @media (prefers-color-scheme: dark){
+      input{ background: rgba(255,255,255,.06); }
+    }
+    input:focus{ box-shadow: var(--focus); border-color: rgba(0,122,255,.55); }
+
+    /* Question */
+    .qCard{
+      margin-top: 14px;
       border-radius: var(--r-lg);
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.04);
-      transform: translateY(0);
-      opacity: 1;
-      transition: opacity .22s ease, transform .22s ease;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.58);
+      box-shadow: var(--shadow2);
+      padding: 16px 16px;
+      transition: transform .20s var(--ease), opacity .20s var(--ease);
       will-change: transform, opacity;
     }
-    .qa.anim-out{
-      opacity: 0;
-      transform: translateY(8px);
+    @media (prefers-color-scheme: dark){
+      .qCard{ background: rgba(255,255,255,.06); }
     }
 
+    .qNum{
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
     .qText{
-      font-size: 16px;
-      line-height: 1.45;
-      letter-spacing: .1px;
       margin:0;
+      font-size: 16px;
+      line-height:1.35;
+      font-weight: 750;
+      letter-spacing: .1px;
     }
 
-    .answers{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:10px;
-    }
+    /* Options */
+    .options{ margin-top: 12px; display:grid; gap:10px; }
 
-    .btnChoice{
-      text-align:left;
-      width:100%;
-      border-radius: 14px;
-      border: 1px solid var(--stroke);
-      background: rgba(0,0,0,.20);
-      color: var(--text);
-      padding: 12px 12px;
-      cursor:pointer;
-      transition: transform .08s ease, border-color .15s ease, background .15s ease;
+    .opt{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
+      gap: 14px;
+      border-radius: var(--r-lg);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.70);
+      padding: 12px 14px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .18s var(--ease), box-shadow .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
     }
-    .btnChoice:hover{
-      border-color: rgba(255,255,255,.26);
-      background: rgba(0,0,0,.26);
+    @media (prefers-color-scheme: dark){
+      .opt{ background: rgba(255,255,255,.06); }
     }
-    .btnChoice:active{ transform: translateY(1px); }
-    .btnChoice[aria-pressed="true"]{
-      border-color: rgba(124,92,255,.55);
-      background: rgba(124,92,255,.12);
+    .opt:hover{ transform: translateY(-1px); box-shadow: 0 12px 26px rgba(0,0,0,.10); }
+    .opt:active{ transform: translateY(0) scale(.995); }
+
+    .optMain{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width: 0;
     }
-    .choiceTitle{
+    .optTitle{
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 900;
+      letter-spacing: .1px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-    .choiceHint{
+    .optHint{
       font-size: 12px;
       color: var(--muted);
+      line-height:1.2;
       white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
-    .actions{
-      margin-top: 2px;
+    .check{
+      width: 26px; height: 26px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
       display:flex;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
       align-items:center;
+      justify-content:center;
+      flex: 0 0 auto;
+      transition: all .18s var(--ease);
+      color: transparent;
+      background: rgba(0,0,0,.03);
+    }
+    @media (prefers-color-scheme: dark){
+      .check{ background: rgba(255,255,255,.06); }
+    }
+
+    .opt[aria-pressed="true"]{
+      border-color: rgba(0,122,255,.55);
+      box-shadow: 0 0 0 4px rgba(0,122,255,.18);
+      background: rgba(0,122,255,.10);
+    }
+    .opt[aria-pressed="true"] .check{
+      border-color: rgba(0,122,255,.55);
+      background: var(--accent);
+      color: #fff;
+    }
+    .check svg{ width: 14px; height: 14px; }
+
+    /* Actions */
+    .actions{
+      margin-top: 12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-start;
     }
 
     .btn{
-      border-radius: 999px;
-      padding: 10px 12px;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.70);
+      padding: 10px 14px;
       font-size: 13px;
-      border: 1px solid var(--stroke);
-      background: rgba(0,0,0,.22);
-      color: var(--text);
+      font-weight: 900;
+      letter-spacing:.1px;
       cursor:pointer;
-      transition: border-color .15s ease, background .15s ease, transform .08s ease, opacity .15s ease;
       user-select:none;
+      transition: transform .18s var(--ease), box-shadow .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease), opacity .18s var(--ease);
     }
-    .btn:hover{
-      border-color: rgba(255,255,255,.26);
-      background: rgba(0,0,0,.28);
+    @media (prefers-color-scheme: dark){
+      .btn{ background: rgba(255,255,255,.06); }
     }
-    .btn:active{ transform: translateY(1px); }
-    .btn[disabled]{
-      cursor:not-allowed;
-      opacity:.45;
+    .btn:hover{ transform: translateY(-1px); box-shadow: 0 12px 26px rgba(0,0,0,.10); }
+    .btn:active{ transform: translateY(0) scale(.99); }
+    .btn:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; transform:none; }
+
+    .btn.primary{
+      border-color: rgba(0,122,255,.55);
+      background: rgba(0,122,255,.12);
+    }
+    .btn.danger{
+      border-color: rgba(255,59,48,.55);
+      background: rgba(255,59,48,.10);
     }
 
-    .kbd{
-      font-size:12px;
-      color: var(--muted2);
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .kbd span{
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.18);
-      padding: 2px 8px;
-      border-radius: 10px;
-      color: var(--muted);
-    }
-
+    /* Toast */
     .toast{
       position: fixed;
       left: 50%;
-      bottom: 18px;
+      bottom: 22px;
       transform: translateX(-50%);
-      background: rgba(0,0,0,.72);
-      border: 1px solid rgba(255,255,255,.18);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 14px;
-      box-shadow: 0 14px 30px rgba(0,0,0,.35);
-      opacity: 0;
-      pointer-events:none;
-      transition: opacity .18s ease, transform .18s ease;
-      max-width: min(560px, calc(100vw - 24px));
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--border);
+      border-radius: var(--r-pill);
+      padding: 10px 14px;
       font-size: 13px;
+      font-weight: 900;
+      letter-spacing:.1px;
+      color: var(--text);
+      box-shadow: 0 16px 40px rgba(0,0,0,.16);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .18s var(--ease), transform .18s var(--ease);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 50;
+    }
+    @media (prefers-color-scheme: dark){
+      .toast{ background: rgba(24,24,28,.90); }
     }
     .toast.show{
-      opacity: 1;
-      transform: translateX(-50%) translateY(-2px);
-    }
-    .toast b{ color: #fff; }
-
-    /* Result view */
-    .resultWrap{
-      display:none;
-      margin-top: 12px;
-    }
-    .resultWrap.show{ display:block; }
-
-    .sheet{
-      margin: 0 auto;
-      padding: 18px;
-      border-radius: var(--r-lg);
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.04);
+      opacity:1;
+      transform: translateX(-50%) translateY(-6px);
     }
 
-    .sheetHead{
+    /* Shake (medium) */
+    @keyframes shakeMedium{
+      0%{ transform: translateX(0); }
+      15%{ transform: translateX(-6px); }
+      30%{ transform: translateX(6px); }
+      45%{ transform: translateX(-5px); }
+      60%{ transform: translateX(5px); }
+      75%{ transform: translateX(-3px); }
+      90%{ transform: translateX(3px); }
+      100%{ transform: translateX(0); }
+    }
+    .shake{ animation: shakeMedium .32s var(--ease); }
+
+    /* Results */
+    .resultHeader{
       display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-      margin-bottom: 14px;
+      flex-direction:column;
+      gap:6px;
+      padding-bottom: 8px;
     }
-    .sheetHead h2{
+    .resTitle{
       margin:0;
-      font-size: 16px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing:.2px;
     }
-    .sheetHead .sub{
-      margin-top:6px;
+    .resSub{
+      margin:0;
       font-size: 13px;
       color: var(--muted);
-      line-height: 1.35;
+      line-height:1.3;
     }
 
-    .grid{
+    .pillGrid{
       display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(74px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
       gap: 8px;
+      align-items:stretch;
     }
+    @media (min-width: 900px){
+      .pillGrid{ grid-template-columns: repeat(12, 1fr); }
+    }
+    @media (max-width: 420px){
+      .pillGrid{ grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    }
+
     .pill{
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.18);
-      border-radius: 999px;
-      padding: 8px 10px;
-      font-size: 13px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-pill);
+      background: rgba(255,255,255,.70);
+      padding: 7px 8px;
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap: 8px;
-      line-height: 1;
-      min-height: 34px;
+      justify-content:center;
+      gap:6px;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing:.1px;
       white-space:nowrap;
     }
-    .pill .n{ color: rgba(255,255,255,.85); font-weight: 650; }
-    .pill .a{ color: rgba(255,255,255,.92); font-weight: 700; letter-spacing: .2px; }
-    .pill[data-a="+"] .a{ color: rgba(87,227,155,.95); }
-    .pill[data-a="-"] .a{ color: rgba(255,107,107,.95); }
-    .pill[data-a="+/-"] .a{ color: rgba(124,92,255,.95); }
-
-    .resultActions{
-      margin-top: 14px;
-      display:flex;
-      justify-content:space-between;
-      gap: 12px;
-      flex-wrap:wrap;
-      align-items:center;
+    @media (prefers-color-scheme: dark){
+      .pill{ background: rgba(255,255,255,.06); }
     }
+    .pill .sym{ font-weight: 1000; }
 
-    /* Responsive */
-    @media (max-width: 760px){
-      header{ flex-direction:column; align-items:stretch; }
-      .progressWrap{ width:100%; align-items:stretch; }
-      .fields{ grid-template-columns: 1fr; }
-    }
-
-    /* For PDF capture: fixed-width A4-like sheet */
-    .pdfMode{
-      width: 794px; /* ~A4 width at 96dpi */
-      max-width: 794px;
+    /* PDF stage — ВАЖНО: отрисовывается, но вне экрана (для html2canvas) */
+    .pdfStage{
+      position: fixed;
+      left: -10000px;
+      top: 0;
+      width: 794px;     /* ~A4 @96dpi */
+      min-height: 1123px;
+      opacity: 1;
+      transform: none;
+      pointer-events:none;
       background: #fff;
       color: #111;
-      border: 1px solid #ddd;
-      box-shadow: none;
-      backdrop-filter: none;
+      padding: 44px;
+      border-radius: 28px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display","SF Pro Text", Arial, sans-serif;
+      z-index: 9999;
     }
-    .pdfMode .sub{ color:#333; }
-    .pdfMode .grid{ gap: 8px; }
-    .pdfMode .pill{
+    .pdfTitle{
+      margin:0 0 8px 0;
+      font-size: 22px;
+      font-weight: 950;
+      letter-spacing:.2px;
+    }
+    .pdfSub{
+      margin:0 0 18px 0;
+      font-size: 13px;
+      color: #555;
+      line-height:1.35;
+    }
+    .pdfStage .pillGrid{
+      grid-template-columns: repeat(8, 1fr); /* 128 => 16 рядов */
+      gap: 8px;
+    }
+    .pdfStage .pill{
       background: #fff;
-      border-color: #ddd;
+      border-color:#D1D1D6;
     }
-    .pdfMode .pill .n{ color:#111; }
-    .pdfMode .pill .a{ color:#111; }
-    .pdfMode .pill[data-a="+"] .a{ color:#0a7a44; }
-    .pdfMode .pill[data-a="-"] .a{ color:#b01818; }
-    .pdfMode .pill[data-a="+/-"] .a{ color:#3b2bbf; }
 
-    /* Hide PDF-only container on screen */
-    #pdfCaptureHost{
-      position: fixed;
-      left: -99999px;
-      top: 0;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
+    @media (prefers-reduced-motion: reduce){
+      *{ transition:none !important; animation:none !important; }
     }
-	/* =========================
-   LIGHT THEME OVERRIDES
-   (paste at the END of <style>)
-   ========================= */
-:root{
-  --bg: #f5f6fa;
-
-  --card: rgba(255,255,255,.78);
-  --card2: rgba(255,255,255,.92);
-
-  --stroke: rgba(15,23,42,.12);
-  --stroke2: rgba(15,23,42,.18);
-
-  --text: rgba(12,14,18,.92);
-  --muted: rgba(12,14,18,.62);
-  --muted2: rgba(12,14,18,.48);
-
-  --shadow: 0 10px 24px rgba(15,23,42,.10);
-}
-
-/* Background */
-body{
-  background:
-    radial-gradient(900px 520px at 12% -10%, rgba(124,92,255,.18), transparent 55%),
-    radial-gradient(900px 520px at 110% 10%, rgba(87,227,155,.12), transparent 55%),
-    radial-gradient(900px 620px at 40% 120%, rgba(255,107,107,.10), transparent 55%),
-    var(--bg);
-}
-
-/* Main surfaces */
-.card{
-  background: linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,255,255,.70));
-  border-color: var(--stroke);
-  box-shadow: var(--shadow);
-}
-
-.qa, .sheet{
-  background: rgba(255,255,255,.70);
-  border-color: var(--stroke);
-}
-
-/* Inputs */
-input{
-  background: rgba(255,255,255,.92);
-  border-color: var(--stroke);
-  color: var(--text);
-}
-input:focus{
-  border-color: rgba(124,92,255,.55);
-  background: rgba(255,255,255,.98);
-}
-
-/* Progress bar */
-.bar{
-  background: rgba(15,23,42,.08);
-  border-color: var(--stroke);
-}
-
-/* Choice buttons */
-.btnChoice{
-  background: rgba(255,255,255,.82);
-  border-color: var(--stroke);
-  color: var(--text);
-}
-.btnChoice:hover{
-  border-color: var(--stroke2);
-  background: rgba(255,255,255,.92);
-}
-.btnChoice[aria-pressed="true"]{
-  border-color: rgba(124,92,255,.55);
-  background: rgba(124,92,255,.12);
-}
-
-/* Action buttons */
-.btn{
-  background: rgba(255,255,255,.86);
-  border-color: var(--stroke);
-  color: var(--text);
-}
-.btn:hover{
-  border-color: var(--stroke2);
-  background: rgba(255,255,255,.94);
-}
-
-/* Pills (result table) */
-.pill{
-  background: rgba(255,255,255,.92);
-  border-color: var(--stroke);
-}
-.pill .n{ color: rgba(12,14,18,.88); }
-.pill .a{ color: rgba(12,14,18,.92); }
-
-/* Toast */
-.toast{
-  background: rgba(255,255,255,.92);
-  border-color: var(--stroke2);
-  color: var(--text);
-  box-shadow: 0 14px 30px rgba(15,23,42,.12);
-}
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <header>
-      <div class="title">
-        <h1>Интегральный тип личности</h1>
-      </div>
+  <div class="bgGlow"></div>
 
-      <div class="card topbar" style="width:100%;">
-        <div class="fields">
-          <div class="field">
-            <label for="firstName">Имя</label>
-            <input id="firstName" type="text" autocomplete="given-name" placeholder="Введите имя" />
-          </div>
-          <div class="field">
-            <label for="lastName">Фамилия</label>
-            <input id="lastName" type="text" autocomplete="family-name" placeholder="Введите фамилию" />
-          </div>
+  <div class="safe">
+    <div class="app">
+
+      <!-- START -->
+      <section id="screenStart" class="screen active">
+        <div class="startWrap">
+          <div class="startButton" id="btnStart" role="button" tabindex="0" aria-label="Старт">Старт</div>
+          <h1 class="brandTitle">Интегральный тип личности</h1>
+          <p class="brandSub">
+            Выберите один из трёх вариантов на каждый вопрос. Переход на следующий — автоматически.
+          </p>
         </div>
+      </section>
 
-        <div class="progressWrap">
-          <div class="progressMeta">
-            <div class="metaSmall" id="qMeta">Вопрос 1 из 128</div>
-            <div class="metaSmall" id="aMeta">Ответов: 0/128</div>
-          </div>
-          <div class="bar" aria-label="Прогресс прохождения теста">
-            <i id="barFill"></i>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <main class="card">
-      <!-- QUESTION VIEW -->
-      <section id="questionView">
-        <div id="qaCard" class="qa">
-          <p class="qText" id="qText"></p>
-
-          <div class="answers" role="group" aria-label="Варианты ответа">
-            <button class="btnChoice" id="c1" type="button" aria-pressed="false">
-              <span class="choiceTitle">Чаще так</span>
-            </button>
-            <button class="btnChoice" id="c2" type="button" aria-pressed="false">
-              <span class="choiceTitle">Бывает так, но не всегда</span>
-            </button>
-            <button class="btnChoice" id="c3" type="button" aria-pressed="false">
-              <span class="choiceTitle">Чаще не так</span>
-            </button>
+      <!-- TEST -->
+      <section id="screenTest" class="screen">
+        <div class="card" id="testCard">
+          <div class="cardTop">
+            <div class="titleBlock">
+              <div class="cardTitle">Интегральный тип личности</div>
+              <div class="cardMeta" id="metaText">Вопрос 1 / 128</div>
+            </div>
+            <div class="cardMeta" id="metaRight">Прогресс</div>
           </div>
 
-          <div class="actions">
-            <button class="btn" id="resetOne" type="button">Сбросить</button>
-            <button class="btn" id="prevQ" type="button">Предыдущий вопрос</button>
-            <div class="kbd" title="Подсказка">
-              <span>Enter</span> — далее (если ответ выбран)
+          <div class="progressWrap">
+            <div class="progress" aria-label="Прогресс"><div id="progressFill"></div></div>
+          </div>
+
+          <div class="section">
+            <div class="inputs" aria-label="Данные участника">
+              <div class="field">
+                <div class="label">Имя</div>
+                <input id="firstName" autocomplete="given-name" placeholder="Иван" />
+              </div>
+              <div class="field">
+                <div class="label">Фамилия</div>
+                <input id="lastName" autocomplete="family-name" placeholder="Иванов" />
+              </div>
+            </div>
+
+            <div class="qCard" id="qCard">
+              <div class="qNum" id="qNum">Вопрос 1</div>
+              <p class="qText" id="qText"></p>
+            </div>
+
+            <div class="options" id="options">
+              <div class="opt" data-value="+" role="button" tabindex="0" aria-pressed="false">
+                <div class="optMain">
+                  <div class="optTitle">Чаще так</div>
+                  <div class="optHint">Обычно соответствует</div>
+                </div>
+                <div class="check" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="opt" data-value="+/-" role="button" tabindex="0" aria-pressed="false">
+                <div class="optMain">
+                  <div class="optTitle">Бывает так, но не всегда</div>
+                  <div class="optHint">Иногда проявляется</div>
+                </div>
+                <div class="check" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="opt" data-value="-" role="button" tabindex="0" aria-pressed="false">
+                <div class="optMain">
+                  <div class="optTitle">Чаще не так</div>
+                  <div class="optHint">Скорее не про вас</div>
+                </div>
+                <div class="check" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn danger" id="btnReset">Сбросить</button>
+              <button class="btn" id="btnPrev">Предыдущий вопрос</button>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- RESULT VIEW -->
-      <section id="resultView" class="resultWrap">
-        <div class="sheet" id="resultSheet">
-          <div class="sheetHead">
-            <div>
-              <h2>Результат</h2>
-              <div class="sub" id="resultSub"></div>
+      <!-- RESULTS -->
+      <section id="screenResult" class="screen">
+        <div class="card" id="resultCard">
+          <div class="cardTop">
+            <div class="titleBlock">
+              <div class="cardTitle">Результат</div>
+              <div class="cardMeta" id="resultMeta">Готово</div>
             </div>
-            <div class="sub" id="resultDate"></div>
+            <div class="cardMeta">100%</div>
           </div>
-          <div class="grid" id="resultGrid" aria-label="Таблица ответов"></div>
 
-          <div class="resultActions">
-            <button class="btn" id="restartAll" type="button">Начать заново</button>
-            <button class="btn" id="downloadPdf" type="button">Скачать результат</button>
+          <div class="progressWrap">
+            <div class="progress" aria-label="Прогресс"><div style="width:100%"></div></div>
+          </div>
+
+          <div class="section">
+            <div class="resultHeader">
+              <p class="resTitle">Таблица ответов</p>
+              <p class="resSub" id="resSub"></p>
+            </div>
+
+            <div class="pillGrid" id="pillGrid"></div>
+
+            <div class="actions">
+              <button class="btn" id="btnRestart">Начать заново</button>
+              <button class="btn primary" id="btnDownload">Скачать результат</button>
+            </div>
           </div>
         </div>
       </section>
-    </main>
+
+      <div class="toast" id="toast">Выберите один из вариантов ответа</div>
+
+      <!-- PDF -->
+      <div class="pdfStage" id="pdfSheet" aria-hidden="true"></div>
+
+    </div>
   </div>
 
-  <div class="toast" id="toast"></div>
-
-  <!-- Hidden PDF capture host -->
-  <div id="pdfCaptureHost"></div>
+  <!-- PDF libs (ВАЖНО: до основного скрипта) -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <script>
-    // ---------- DATA ----------
-    const QUESTIONS = [
-      "Я просыпаюсь не сразу, и даже после того, как встану, еще долго могу находиться в полусонном состоянии.",
-      "Мне нравятся комплименты, мне нравится, когда меня хвалят.",
-      "Если у меня что-то заболит, то это беспокоит меня долго, даже когда мне станет легче, то сохраняется тревога по поводу здоровья.",
-      "Я предпочел(ла) бы иметь пассивный доход, чтобы работать мало и иметь много свободного времени.",
-      "Когда я голодный(ая), я беру (накладываю) себе еды больше, чем, оказывается, - могу съесть.",
-      "После споров, конфликтов я думаю, что скорее всего я был (а) в чем-то не прав (а).",
-      "В отношениях с людьми я стараюсь избегать каких-либо обязательств.",
-      "Люди в большинстве своем безответственны, поэтому чувствую желание их контролировать.",
-      "Бывает, что мне трудно понять, хочу ли я есть и что именно хотелось бы съесть.",
-      "Я думаю, что я очень хороший человек.",
-      "Я очень серьезно отношусь к традициям моей семьи, моей культуры, религии, нации.",
-      "Я чувствую, что в большинстве своем люди дружественны или равнодушны ко мне.",
-      "В личных отношениях я беру инициативу на себя, предпочитаю быть ведущим, а не ведомым.",
-      "Я чувствую, что, скорее всего, я не очень хороший человек.",
-      "Даже если я переел, дискомфорт в животе у меня практически отсутствует или длится недолго.",
-      "Так получается, что в жизни я вынужден организовывать других людей, руководить ими, отвечать за их поступки.",
-      "На стресс я реагирую несколько замедленно, в такие напряженные моменты мне хочется просто закрыть глаза и ничего не видеть, и не слышать.",
-      "Я думаю, что большинство людей восхищается мной.",
-      "Я считаю, что интересы всего общества, коллектива важнее, чем интересы каждого человека в отдельности.",
-      "Детям для развития надо предоставлять как можно больше свободы и ни в чем не ограничивать их.",
-      "Я обостренно реагирую на неожиданные прикосновения, щекотку, - вздрагиваю, иногда даже пугаюсь.",
-      "Я думаю, что не люблю себя.",
-      "Если у меня что-то заболит, то я не буду долго мучиться и приму какое-нибудь лекарство.",
-      "Я убежден, что в окружающем меня мире очень многое устроено не так, как должно быть.",
-      "Я не сразу могу понять – уже заболел(а) или еще нет, иногда самочувствие как бы балансирует на грани болезни.",
-      "Я считаю, что я намного способнее и увереннее большинства людей.",
-      "Я считаю, что причины всех проблем человека нужно искать в его прошлом.",
-      "Мне не нравится контролировать других людей.",
-      "Если я узнаю что-то новое, я сразу же начинаю строить планы, как я смогу применить эту информацию в будущем.",
-      "Я страдаю из-за своего чувства долга перед другими людьми.",
-      "Когда у меня возникают проблемы или физическое недомогание, я могу принять решение изменить образ жизни, не переедать, заняться физкультурой, но, когда дискомфорт проходит, я легко откладываю данное решение на потом.",
-      "Я не терплю, когда меня не дослушивают до конца, не дают мне договорить, высказаться.",
-      "Я не сразу реагирую на перемены вокруг меня (погоды, новую обстановку, новых людей), мне надо некоторое время осмотреться, привыкнуть, адаптироваться.",
-      "Я не сомневаюсь, что могу добиться в жизни всего, чего захочу.",
-      "Если меня что-то вывело из равновесия, то я очень долго не могу прийти в себя.",
-      "Меня считают добрым и беззлобным человеком.",
-      "Меня очень легко вывести из равновесия, я легко взрываюсь, раздражаюсь.",
-      "Мне подходит работа исполнителя под чьим-то руководством.",
-      "Я не могу долго концентрировать внимание на каком-то одном деле, мысли, мне необходимо расслабиться и отвлечься.",
-      "Людям нельзя давать свободу, они не знают, что с ней делать.",
-      "В общении, мне бывает трудно сразу же сформулировать свои мысли, подобрать правильные слова, бывает, что понимание того, что нужно было сказать или сделать приходит позже.",
-      "Я не могу делать того, что мне не интересно, что я не хочу делать.",
-      "После перенесенного заболевания процесс выздоровления у меня затягивается, трудно вернуться к первоначальному здоровому состоянию.",
-      "Я не считаю, что должен брать на себя ответственность за других людей.",
-      "Я очень легко и быстро завожу новые знакомства, влюбляюсь.",
-      "Я грустный человек",
-      "Я легко забываю людей.",
-      "Если близкие не разделяют моих взглядов на жизнь, то я стараюсь убедить их в своей правоте.",
-      "Я не решаюсь внутри себя давать оценки людям с первого взгляда.",
-      "Я считаю, что я - великий человек.",
-      "Если я злоупотреблю алкоголем, то меня еще долго мучают последствия этого (головная боль, тошнота и т.п.).",
-      "Меня трудно чем-нибудь удивить.",
-      "Если я иду в магазин, то обязательно что-нибудь куплю. Бывает, что я потом понимаю, что мне это совсем не нужно, или не нужно в таком количестве.",
-      "Я чувствую себя виноватым (ой) даже без видимой на то причины.",
-      "После сильных конфликтов или переживаний я чувствую потребность лечь спать, поесть, выпить, забыться или отвлечься другим способом.",
-      "Если я вижу недостатки в других людях, то я чувствую себя должным исправить их.",
-      "Бывает, что я опаздываю из-за того, что не могу оторваться от текущих занятий.",
-      "Мне нравится работать только на себя, я стремлюсь подороже продать свои таланты и способности.",
-      "В личных отношениях я очень сильно привязываюсь к другим людям.",
-      "У меня нет потребности менять что-либо вокруг.",
-      "Я схватываю информацию «на лету», бывает, что мне еще что-то не договорили, а мне уже все понятно.",
-      "Я недоволен(на) собой",
-      "Я не чувствую сильной привязанности к местам, где жил когда-то, к людям с которыми тесно общался.",
-      "Сознаюсь, что я ревнивый человек, но для ревности всегда есть внешние причины – «Дыма без огня не бывает!».",
-      "Мне трудно познакомиться первым, начать разговор, проявить инициативу в общении.",
-      "Я могу позволить себе гораздо больше, чем большинство людей.",
-      "Я не смогу успокоиться, пока не закончу дело, которое начал.",
-      "Если кто-то не согласен со мной, я не чувствую сильной потребности доказывать свою правоту.",
-      "У меня в голове заранее проигрываются детали будущих событий, представляются различные версии их развития, строятся прогнозы.",
-      "Мне неловко, когда меня благодарят или хвалят.",
-      "Я засыпаю мгновенно.",
-      "Мои обиды или обвинения никогда не бывают беспочвенными.",
-      "Прежде чем начать выполнять работу, мне необходимо сначала получить подробные инструкции, основательно подготовиться, собраться с мыслями и силами.",
-      "Меня не сильно заботит то, как я выгляжу в глазах других людей.",
-      "После стресса я очень долго не могу прийти в себя.",
-      "В первую очередь, я стремлюсь обеспечить себе стабильность, комфорт и спокойствие.",
-      "У меня так быстро возникают новые идеи, что многие из них я не успеваю запоминать.",
-      "Я чувствую готовность принести себя в жертву ради других людей.",
-      "Внешняя среда, люди, погода и т.д. мало влияют на мое самочувствие и настроение.",
-      "Если человек хоть раз обманул меня, то я никогда больше не смогу доверять ему.",
-      "Принимая решение, я руководствуюсь правилом «Семь раз отмерь, один раз отрежь!».",
-      "Я считаю, что у меня нет недостатков.",
-      "Бывает, что я не могу остановиться в мыслях, чувствах, поступках, даже если понимаю, что это необходимо.",
-      "Мне гораздо легче разрешить, чем запретить.",
-      "У меня часто бывает предвидение, предчувствие событий, я могу чувствовать на расстоянии то, что другие не чувствуют или не замечают.",
-      "Я чувствую, что я приношу близким горе и страдание.",
-      "Я недолго переживаю, - как из-за неприятных, так и из-за радостных событий жизни.",
-      "Мне плохо из-за того, что меня мало кто понимает.",
-      "Я стараюсь не загружать себя мыслями о будущем, жить настоящим.",
-      "У меня так много различных желаний, что я не успеваю их все удовлетворить.",
-      "У меня возникает желание переделать, исправить что-то, что уже прожито в прошлом.",
-      "Для меня лучше «плохой мир», чем «хорошая», пусть даже справедливая война.",
-      "Чтобы начать выполнять дело, работу, я не нуждаюсь в подробном инструктировании, мне достаточно ухватить суть задания.",
-      "Я все время кому-то что-то должен и у меня такое чувство, что мне никогда не расплатиться с этими долгами.",
-      "Я легко могу бросить дело, даже если оно еще не закончено, и не буду переживать по этому поводу.",
-      "В личных отношениях я никогда не прощаю предательства.",
-      "Бывает, что я испытываю сильную потребность бесцельно бродить по городу, по улицам, по магазинам просто так, разглядывая окружающее (дома, людей, витрины, товары и т.д.).",
-      "Я жизнерадостный человек.",
-      "В общении я предпочту иметь узкий круг хорошо проверенных людей широкому кругу новых знакомых по поговорке – «старый друг лучше новых двух».",
-      "В обучении большая ответственность за его результат лежит на ученике, не «учитель учит», а «ученик учится».",
-      "Заболеваю я быстро и внезапно: только что не было ничего и вдруг уже что-то болит, повышается температура, появляется сильное недомогание.",
-      "Я чувствую себя очень неуверенным человеком.",
-      "Я скептически отношусь к общественным устоям, традициям, нормам.",
-      "Если я не оставляю кого-то в покое, то это потому что я забочусь о благе этого человека или других людей.",
-      "Бывает, что мне очень трудно заставить себя встать с кровати, одеться, собраться, заняться какими-либо делами.",
-      "Я практически не гружусь ответственностью перед другими людьми.",
-      "Я долго лежу, ворочаюсь в кровати, прежде чем засну.",
-      "Я не требовательный человек, я снисходительно отношусь к чужим слабостям и недостаткам.",
-      "В делах я люблю рисковать, принимая неожиданные, даже авантюрные решения.",
-      "Мне все в жизни дается большим трудом.",
-      "Я считаю, что интересы отдельного человека важнее, чем интересы общества, коллектива.",
-      "Меня очень напрягают ситуации, которые я не могу контролировать.",
-      "Я стараюсь во всем проявлять осторожность, не принимать скоропалительных решений, оценить все риски.",
-      "Я не чувствую себя виноватым.",
-      "Я не могу полностью переключиться на новое дело, пока не доведены до конца текущие дела.",
-      "Я спокойный, рассудительный человек.",
-      "У меня обостренное восприятие запахов, звуков, бывает, что меня они раздражают, а других вокруг – нет.",
-      "Мне кажется, что я довольно неудачливый человек.",
-      "Я не вижу смысла копаться в прошлом, анализировать свои и чужие ошибки.",
-      "Меня обижает, что в жизни я получаю благодарности от людей гораздо меньше, чем я того заслуживаю.",
-      "Иногда мне хочется, чтобы время просто остановилось и ничего вокруг не происходило.",
-      "Я знаю, что от природы мне даны большие, чем другим способности и таланты.",
-      "Мне трудно заканчивать дела, отношения.",
-      "Я могу понять любого.",
-      "Я просыпаюсь мгновенно.",
-      "Меня беспокоит, что я плохо выгляжу в глазах других людей.",
-      "Я легко отвлекаюсь, забываю о своих обещаниях кому-то или собственных планах.",
-      "Я не могу полностью доверять другим людям."
+  (() => {
+    const TEST_NAME = "Интегральный тип личности";
+
+    const questions = [
+      `Я просыпаюсь не сразу, и даже после того, как встану, еще долго могу находиться в полусонном состоянии.`,
+      `Мне нравятся комплименты, мне нравится, когда меня хвалят.`,
+      `Если у меня что-то заболит, то это беспокоит меня долго, даже когда мне станет легче, то сохраняется тревога по поводу здоровья.`,
+      `Я предпочел(ла) бы иметь пассивный доход, чтобы работать мало и иметь много свободного времени.`,
+      `Когда я голодный(ая), я беру (накладываю) себе еды больше, чем, оказывается, - могу съесть.`,
+      `После споров, конфликтов я думаю, что скорее всего я был (а) в чем-то не прав (а).`,
+      `В отношениях с людьми я стараюсь избегать каких-либо обязательств.`,
+      `Люди в большинстве своем безответственны, поэтому чувствую желание их контролировать.`,
+      `Бывает, что мне трудно понять, хочу ли я есть и что именно хотелось бы съесть.`,
+      `Я думаю, что я очень хороший человек.`,
+      `Я очень серьезно отношусь к традициям моей семьи, моей культуры, религии, нации.`,
+      `Я чувствую, что в большинстве своем люди дружественны или равнодушны ко мне.`,
+      `В личных отношениях я беру инициативу на себя, предпочитаю быть ведущим, а не ведомым.`,
+      `Я чувствую, что, скорее всего, я не очень хороший человек.`,
+      `Даже если я переел, дискомфорт в животе у меня практически отсутствует или длится недолго.`,
+      `Так получается, что в жизни я вынужден организовывать других людей, руководить ими, отвечать за их поступки.`,
+      `На стресс я реагирую несколько замедленно, в такие напряженные моменты мне хочется просто закрыть глаза и ничего не видеть, и не слышать.`,
+      `Я думаю, что большинство людей восхищается мной.`,
+      `Я считаю, что интересы всего общества, коллектива важнее, чем интересы каждого человека в отдельности.`,
+      `Детям для развития надо предоставлять как можно больше свободы и ни в чем не ограничивать их.`,
+      `Я обостренно реагирую на неожиданные прикосновения, щекотку, - вздрагиваю, иногда даже пугаюсь.`,
+      `Я думаю, что не люблю себя.`,
+      `Если у меня что-то заболит, то я не буду долго мучиться и приму какое-нибудь лекарство.`,
+      `Я убежден, что в окружающем меня мире очень многое устроено не так, как должно быть.`,
+      `Я не сразу могу понять – уже заболел(а) или еще нет, иногда самочувствие как бы балансирует на грани болезни.`,
+      `Я считаю, что я намного способнее и увереннее большинства людей.`,
+      `Я считаю, что причины всех проблем человека нужно искать в его прошлом.`,
+      `Мне не нравится контролировать других людей.`,
+      `Если я узнаю что-то новое, я сразу же начинаю строить планы, как я смогу применить эту информацию в будущем.`,
+      `Я страдаю из-за своего чувства долга перед другими людьми.`,
+      `Когда у меня возникают проблемы или физическое недомогание, я могу принять решение изменить образ жизни, не переедать, заняться физкультурой, но, когда дискомфорт проходит, я легко откладываю данное решение на потом.`,
+      `Я не терплю, когда меня не дослушивают до конца, не дают мне договорить, высказаться.`,
+      `Я не сразу реагирую на перемены вокруг меня (погоды, новую обстановку, новых людей), мне надо некоторое время осмотреться, привыкнуть, адаптироваться.`,
+      `Я не сомневаюсь, что могу добиться в жизни всего, чего захочу.`,
+      `Если меня что-то вывело из равновесия, то я очень долго не могу прийти в себя.`,
+      `Меня считают добрым и беззлобным человеком.`,
+      `Меня очень легко вывести из равновесия, я легко взрываюсь, раздражаюсь.`,
+      `Мне подходит работа исполнителя под чьим-то руководством.`,
+      `Я не могу долго концентрировать внимание на каком-то одном деле, мысли, мне необходимо расслабиться и отвлечься.`,
+      `Людям нельзя давать свободу, они не знают, что с ней делать.`,
+      `В общении, мне бывает трудно сразу же сформулировать свои мысли, подобрать правильные слова, бывает, что понимание того, что нужно было сказать или сделать приходит позже.`,
+      `Я не могу делать того, что мне не интересно, что я не хочу делать.`,
+      `После перенесенного заболевания процесс выздоровления у меня затягивается, трудно вернуться к первоначальному здоровому состоянию.`,
+      `Я не считаю, что должен брать на себя ответственность за других людей.`,
+      `Я очень легко и быстро завожу новые знакомства, влюбляюсь.`,
+      `Я грустный человек`,
+      `Я легко забываю людей.`,
+      `Если близкие не разделяют моих взглядов на жизнь, то я стараюсь убедить их в своей правоте.`,
+      `Я не решаюсь внутри себя давать оценки людям с первого взгляда.`,
+      `Я считаю, что я - великий человек.`,
+      `Если я злоупотреблю алкоголем, то меня еще долго мучают последствия этого (головная боль, тошнота и т.п.).`,
+      `Меня трудно чем-нибудь удивить.`,
+      `Если я иду в магазин, то обязательно что-нибудь куплю. Бывает, что я потом понимаю, что мне это совсем не нужно, или не нужно в таком количестве.`,
+      `Я чувствую себя виноватым (ой) даже без видимой на то причины.`,
+      `После сильных конфликтов или переживаний я чувствую потребность лечь спать, поесть, выпить, забыться или отвлечься другим способом.`,
+      `Если я вижу недостатки в других людях, то я чувствую себя должным исправить их.`,
+      `Бывает, что я опаздываю из-за того, что не могу оторваться от текущих занятий.`,
+      `Мне нравится работать только на себя, я стремлюсь подороже продать свои таланты и способности.`,
+      `В личных отношениях я очень сильно привязываюсь к другим людям.`,
+      `У меня нет потребности менять что-либо вокруг.`,
+      `Я схватываю информацию «на лету», бывает, что мне еще что-то не договорили, а мне уже все понятно.`,
+      `Я недоволен(на) собой`,
+      `Я не чувствую сильной привязанности к местам, где жил когда-то, к людям с которыми тесно общался.`,
+      `Сознаюсь, что я ревнивый человек, но для ревности всегда есть внешние причины – «Дыма без огня не бывает!».`,
+      `Мне трудно познакомиться первым, начать разговор, проявить инициативу в общении.`,
+      `Я могу позволить себе гораздо больше, чем большинство людей.`,
+      `Я не смогу успокоиться, пока не закончу дело, которое начал.`,
+      `Если кто-то не согласен со мной, я не чувствую сильной потребности доказывать свою правоту.`,
+      `У меня в голове заранее проигрываются детали будущих событий, представляются различные версии их развития, строятся прогнозы.`,
+      `Мне неловко, когда меня благодарят или хвалят.`,
+      `Я засыпаю мгновенно.`,
+      `Мои обиды или обвинения никогда не бывают беспочвенными.`,
+      `Прежде чем начать выполнять работу, мне необходимо сначала получить подробные инструкции, основательно подготовиться, собраться с мыслями и силами.`,
+      `Меня не сильно заботит то, как я выгляжу в глазах других людей.`,
+      `После стресса я очень долго не могу прийти в себя.`,
+      `В первую очередь, я стремлюсь обеспечить себе стабильность, комфорт и спокойствие.`,
+      `У меня так быстро возникают новые идеи, что многие из них я не успеваю запоминать.`,
+      `Я чувствую готовность принести себя в жертву ради других людей.`,
+      `Внешняя среда, люди, погода и т.д. мало влияют на мое самочувствие и настроение.`,
+      `Если человек хоть раз обманул меня, то я никогда больше не смогу доверять ему.`,
+      `Принимая решение, я руководствуюсь правилом «Семь раз отмерь, один раз отрежь!».`,
+      `Я считаю, что у меня нет недостатков.`,
+      `Бывает, что я не могу остановиться в мыслях, чувствах, поступках, даже если понимаю, что это необходимо.`,
+      `Мне гораздо легче разрешить, чем запретить.`,
+      `У меня часто бывает предвидение, предчувствие событий, я могу чувствовать на расстоянии то, что другие не чувствуют или не замечают.`,
+      `Я чувствую, что я приношу близким горе и страдание.`,
+      `Я недолго переживаю, - как из-за неприятных, так и из-за радостных событий жизни.`,
+      `Мне плохо из-за того, что меня мало кто понимает.`,
+      `Я стараюсь не загружать себя мыслями о будущем, жить настоящим.`,
+      `У меня так много различных желаний, что я не успеваю их все удовлетворить.`,
+      `У меня возникает желание переделать, исправить что-то, что уже прожито в прошлом.`,
+      `Для меня лучше «плохой мир», чем «хорошая», пусть даже справедливая война.`,
+      `Чтобы начать выполнять дело, работу, я не нуждаюсь в подробном инструктировании, мне достаточно ухватить суть задания.`,
+      `Я все время кому-то что-то должен и у меня такое чувство, что мне никогда не расплатиться с этими долгами.`,
+      `Я легко могу бросить дело, даже если оно еще не закончено, и не буду переживать по этому поводу.`,
+      `В личных отношениях я никогда не прощаю предательства.`,
+      `Бывает, что я испытываю сильную потребность бесцельно бродить по городу, по улицам, по магазинам просто так, разглядывая окружающее (дома, людей, витрины, товары и т.д.).`,
+      `Я жизнерадостный человек.`,
+      `В общении я предпочту иметь узкий круг хорошо проверенных людей широкому кругу новых знакомых по поговорке – «старый друг лучше новых двух».`,
+      `В обучении большая ответственность за его результат лежит на ученике, не «учитель учит», а «ученик учится».`,
+      `Заболеваю я быстро и внезапно: только что не было ничего и вдруг уже что-то болит, повышается температура, появляется сильное недомогание.`,
+      `Я чувствую себя очень неуверенным человеком.`,
+      `Я скептически отношусь к общественным устоям, традициям, нормам.`,
+      `Если я не оставляю кого-то в покое, то это потому что я забочусь о благе этого человека или других людей.`,
+      `Бывает, что мне очень трудно заставить себя встать с кровати, одеться, собраться, заняться какими-либо делами.`,
+      `Я практически не гружусь ответственностью перед другими людьми.`,
+      `Я долго лежу, ворочаюсь в кровати, прежде чем засну.`,
+      `Я не требовательный человек, я снисходительно отношусь к чужим слабостям и недостаткам.`,
+      `В делах я люблю рисковать, принимая неожиданные, даже авантюрные решения.`,
+      `Мне все в жизни дается большим трудом.`,
+      `Я считаю, что интересы отдельного человека важнее, чем интересы общества, коллектива.`,
+      `Меня очень напрягают ситуации, которые я не могу контролировать.`,
+      `Я стараюсь во всем проявлять осторожность, не принимать скоропалительных решений, оценить все риски.`,
+      `Я не чувствую себя виноватым.`,
+      `Я не могу полностью переключиться на новое дело, пока не доведены до конца текущие дела.`,
+      `Я спокойный, рассудительный человек.`,
+      `У меня обостренное восприятие запахов, звуков, бывает, что меня они раздражают, а других вокруг – нет.`,
+      `Мне кажется, что я довольно неудачливый человек.`,
+      `Я не вижу смысла копаться в прошлом, анализировать свои и чужие ошибки.`,
+      `Меня обижает, что в жизни я получаю благодарности от людей гораздо меньше, чем я того заслуживаю.`,
+      `Иногда мне хочется, чтобы время просто остановилось и ничего вокруг не происходило.`,
+      `Я знаю, что от природы мне даны большие, чем другим способности и таланты.`,
+      `Мне трудно заканчивать дела, отношения.`,
+      `Я могу понять любого.`,
+      `Я просыпаюсь мгновенно.`,
+      `Меня беспокоит, что я плохо выгляжу в глазах других людей.`,
+      `Я легко отвлекаюсь, забываю о своих обещаниях кому-то или собственных планах.`,
+      `Я не могу полностью доверять другим людям.`
     ];
 
-    const MAP = {
-      c1: "+",
-      c2: "+/-",
-      c3: "-"
+    // DOM
+    const screenStart = document.getElementById('screenStart');
+    const screenTest = document.getElementById('screenTest');
+    const screenResult = document.getElementById('screenResult');
+
+    const btnStart = document.getElementById('btnStart');
+
+    const qCard = document.getElementById('qCard');
+    const qNum = document.getElementById('qNum');
+    const qText = document.getElementById('qText');
+    const metaText = document.getElementById('metaText');
+    const progressFill = document.getElementById('progressFill');
+
+    const firstName = document.getElementById('firstName');
+    const lastName = document.getElementById('lastName');
+
+    const opts = Array.from(document.querySelectorAll('.opt'));
+    const btnReset = document.getElementById('btnReset');
+    const btnPrev = document.getElementById('btnPrev');
+
+    const resultCard = document.getElementById('resultCard');
+    const resSub = document.getElementById('resSub');
+    const pillGrid = document.getElementById('pillGrid');
+    const btnRestart = document.getElementById('btnRestart');
+    const btnDownload = document.getElementById('btnDownload');
+
+    const toast = document.getElementById('toast');
+    const pdfSheet = document.getElementById('pdfSheet');
+
+    // State
+    const total = questions.length;
+    let idx = 0;
+    let answers = new Array(total).fill(null);
+
+    // Helpers
+    const nowRuDate = () => {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2,'0');
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const yy = d.getFullYear();
+      return `${dd}.${mm}.${yy}`;
     };
 
-    // ---------- STATE ----------
-    let idx = 0;
-    let answers = Array(QUESTIONS.length).fill(null);
+    const safeName = (s) => (s || '').trim();
+    const fullName = () => {
+      const fn = safeName(firstName.value);
+      const ln = safeName(lastName.value);
+      const both = `${fn} ${ln}`.trim();
+      return both || '—';
+    };
 
-    // ---------- UI REFS ----------
-    const qText = document.getElementById("qText");
-    const qaCard = document.getElementById("qaCard");
-    const btnC1 = document.getElementById("c1");
-    const btnC2 = document.getElementById("c2");
-    const btnC3 = document.getElementById("c3");
-    const btnResetOne = document.getElementById("resetOne");
-    const btnPrev = document.getElementById("prevQ");
-
-    const qMeta = document.getElementById("qMeta");
-    const aMeta = document.getElementById("aMeta");
-    const barFill = document.getElementById("barFill");
-
-    const questionView = document.getElementById("questionView");
-    const resultView = document.getElementById("resultView");
-    const resultGrid = document.getElementById("resultGrid");
-    const resultSub = document.getElementById("resultSub");
-    const resultDate = document.getElementById("resultDate");
-    const restartAll = document.getElementById("restartAll");
-    const downloadPdf = document.getElementById("downloadPdf");
-
-    const firstName = document.getElementById("firstName");
-    const lastName = document.getElementById("lastName");
-
-    const toast = document.getElementById("toast");
-    let toastTimer = null;
-
-    // ---------- HELPERS ----------
-    function showToast(msg){
-      if (toastTimer) clearTimeout(toastTimer);
-      toast.textContent = msg;
-      toast.classList.add("show");
-      toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+    function vibrate(pattern){
+      if (!navigator.vibrate) return;
+      try { navigator.vibrate(pattern); } catch(e){}
     }
 
-    function answeredCount(){
-      return answers.reduce((n,a)=> n + (a ? 1 : 0), 0);
+    function shake(el){
+      el.classList.remove('shake');
+      void el.offsetWidth;
+      el.classList.add('shake');
+      setTimeout(()=>el.classList.remove('shake'), 450);
+    }
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=>toast.classList.remove('show'), 1600);
+    }
+
+    function setScreen(active){
+      [screenStart, screenTest, screenResult].forEach(s => s.classList.remove('active'));
+      active.classList.add('active');
+      active.classList.add('animIn');
+      setTimeout(()=>active.classList.remove('animIn'), 520);
+    }
+
+    function setPressed(){
+      const v = answers[idx];
+      opts.forEach(b=>{
+        b.setAttribute('aria-pressed', (b.dataset.value === v) ? 'true' : 'false');
+      });
     }
 
     function updateProgress(){
-      const total = QUESTIONS.length;
-      const done = answeredCount();
-      const pct = Math.round((done / total) * 100);
-      barFill.style.width = pct + "%";
-      qMeta.textContent = `Вопрос ${idx + 1} из ${total}`;
-      aMeta.textContent = `Ответов: ${done}/${total}`;
-      btnPrev.disabled = idx === 0;
-    }
-
-    function setPressedStates(){
-      const a = answers[idx];
-      btnC1.setAttribute("aria-pressed", String(a === "+"));
-      btnC2.setAttribute("aria-pressed", String(a === "+/-"));
-      btnC3.setAttribute("aria-pressed", String(a === "-"));
+      metaText.textContent = `Вопрос ${idx+1} / ${total}`;
+      const answered = answers.filter(Boolean).length;
+      progressFill.style.width = `${Math.round((answered / total) * 100)}%`;
+      btnPrev.disabled = (idx === 0);
     }
 
     function renderQuestion(){
-      qText.textContent = `${idx + 1}. ${QUESTIONS[idx]}`;
-      setPressedStates();
+      qNum.textContent = `Вопрос ${idx+1}`;
+      qText.textContent = questions[idx];
+      setPressed();
       updateProgress();
     }
 
-    function animateSwap(nextIdx){
-      qaCard.classList.add("anim-out");
-      const onEnd = () => {
-        qaCard.removeEventListener("transitionend", onEnd);
-        idx = nextIdx;
-        renderQuestion();
-        requestAnimationFrame(() => {
-          qaCard.classList.remove("anim-out");
-        });
-      };
-      qaCard.addEventListener("transitionend", onEnd, { once: true });
-    }
-
-    function goNext(){
-      // if current unanswered -> warn
-      if (!answers[idx]){
-        showToast("Выберите один из вариантов ответа");
-        return;
-      }
-      if (idx < QUESTIONS.length - 1){
-        animateSwap(idx + 1);
-      } else {
-        showResults();
-      }
-    }
-
-    function choose(symbol){
-      const prev = answers[idx];
-      answers[idx] = symbol;
-
-      // If user clicked already-selected option, treat as "continue"
-      if (prev === symbol){
-        goNext();
-        return;
-      }
-
-      setPressedStates();
-      updateProgress();
-
-      // Auto-advance with animation
-      if (idx < QUESTIONS.length - 1){
-        animateSwap(idx + 1);
-      } else {
-        showResults();
-      }
-    }
-
-    function resetCurrent(){
-      if (!answers[idx]){
-        showToast("Нечего сбрасывать — ответ не выбран");
-        return;
-      }
-      answers[idx] = null;
-      setPressedStates();
-      updateProgress();
-      showToast("Ответ сброшен");
-    }
-
-    function prevQuestion(){
-      if (idx === 0) return;
-      animateSwap(idx - 1);
-    }
-
-    function showResults(){
-      // Ensure all answered (на всякий случай)
-      const total = QUESTIONS.length;
-      const done = answeredCount();
-      if (done !== total){
-        showToast("Не все вопросы отвечены");
-        return;
-      }
-
-      questionView.style.display = "none";
-      resultView.classList.add("show");
-
-      const fn = (firstName.value || "").trim();
-      const ln = (lastName.value || "").trim();
-      const fullName = `${fn} ${ln}`.trim() || "—";
-
-      const dt = new Date();
-      const dtStr = dt.toLocaleDateString("ru-RU", { year:"numeric", month:"long", day:"2-digit" });
-
-      resultSub.textContent = `Участник: ${fullName}`;
-      resultDate.textContent = dtStr;
-
-      // Build pills
-      resultGrid.innerHTML = "";
-      for (let i=0; i<answers.length; i++){
-        const a = answers[i] || "—";
-        const pill = document.createElement("div");
-        pill.className = "pill";
-        pill.dataset.a = a;
-        pill.innerHTML = `<span class="n">${i+1}:</span><span class="a">${a}</span>`;
-        resultGrid.appendChild(pill);
-      }
-
-      // Progress to 100%
-      barFill.style.width = "100%";
-      qMeta.textContent = `Завершено: ${total} вопросов`;
-      aMeta.textContent = `Ответов: ${total}/${total}`;
-    }
-
-    function restart(){
-      idx = 0;
-      answers = Array(QUESTIONS.length).fill(null);
-
-      resultView.classList.remove("show");
-      questionView.style.display = "block";
-
-      // reset UI
+    async function transitionQuestion(nextIdx){
+      // лёгкая визуальная “вибрация” + задержка
+      vibrate(10);
+      qCard.style.opacity = '0';
+      qCard.style.transform = 'translateY(8px) scale(.995)';
+      await new Promise(r=>setTimeout(r, 170));
+      idx = nextIdx;
       renderQuestion();
-      showToast("Начали заново");
+      qCard.style.opacity = '1';
+      qCard.style.transform = 'translateY(0) scale(1)';
     }
 
-    async function downloadResultPdf(){
-      const { jsPDF } = window.jspdf || {};
-      if (!window.html2canvas || !jsPDF){
-        showToast("Не удалось загрузить модули PDF (проверь интернет)");
-        return;
-      }
+    function start(){
+      screenStart.classList.add('animOut');
+      setTimeout(()=>{
+        screenStart.classList.remove('animOut');
+        setScreen(screenTest);
+        renderQuestion();
+      }, 230);
+    }
 
-      // Create a dedicated capture sheet to guarantee A4 layout and matching pill design
-      const host = document.getElementById("pdfCaptureHost");
-      host.innerHTML = "";
+    btnStart.addEventListener('click', start);
+    btnStart.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); start(); }
+    });
 
-      const capture = document.createElement("div");
-      capture.className = "sheet pdfMode";
-      capture.style.padding = "22px";
-      capture.style.borderRadius = "18px";
+    opts.forEach(btn=>{
+      const choose = async () => {
+        answers[idx] = btn.dataset.value;
+        setPressed();
 
-      const fn = (firstName.value || "").trim();
-      const ln = (lastName.value || "").trim();
-      const fullName = `${fn} ${ln}`.trim() || "—";
-      const dt = new Date();
-      const dtStr = dt.toLocaleDateString("ru-RU", { year:"numeric", month:"long", day:"2-digit" });
+        // автопереход с небольшой задержкой
+        await new Promise(r=>setTimeout(r, 240));
 
-      const head = document.createElement("div");
-      head.className = "sheetHead";
-      head.innerHTML = `
-        <div>
-          <h2>Интегральный тип личности</h2>
-          <div class="sub">Участник: ${escapeHtml(fullName)}</div>
-        </div>
-        <div class="sub">${escapeHtml(dtStr)}</div>
-      `;
+        if (idx === total - 1){
+          showResults();
+          return;
+        }
+        await transitionQuestion(idx + 1);
+      };
 
-      const grid = document.createElement("div");
-      grid.className = "grid";
-      grid.style.marginTop = "14px";
-
-      for (let i=0; i<answers.length; i++){
-        const a = answers[i] || "—";
-        const pill = document.createElement("div");
-        pill.className = "pill";
-        pill.dataset.a = a;
-        pill.innerHTML = `<span class="n">${i+1}:</span><span class="a">${a}</span>`;
-        grid.appendChild(pill);
-      }
-
-      capture.appendChild(head);
-      capture.appendChild(grid);
-      host.appendChild(capture);
-
-      showToast("Формирую PDF…");
-
-      // Render to canvas
-      const canvas = await window.html2canvas(capture, {
-        backgroundColor: "#ffffff",
-        scale: 2.2,
-        useCORS: true
+      btn.addEventListener('click', choose);
+      btn.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter' || e.key===' '){ e.preventDefault(); choose(); }
       });
+    });
 
-      const imgData = canvas.toDataURL("image/png");
+    btnReset.addEventListener('click', ()=>{
+      answers[idx] = null;
+      setPressed();
+      vibrate(10);
+    });
 
-      // A4 portrait in mm
-      const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const margin = 10;
+    btnPrev.addEventListener('click', async ()=>{
+      if(idx === 0) return;
+      await transitionQuestion(idx - 1);
+    });
 
-      // Calculate image size to fit on ONE page (as required)
-      const imgWpx = canvas.width;
-      const imgHpx = canvas.height;
-      const ratio = imgWpx / imgHpx;
-
-      let drawW = pageW - margin*2;
-      let drawH = drawW / ratio;
-
-      if (drawH > pageH - margin*2){
-        drawH = pageH - margin*2;
-        drawW = drawH * ratio;
-      }
-
-      const x = (pageW - drawW) / 2;
-      const y = margin;
-
-      pdf.addImage(imgData, "PNG", x, y, drawW, drawH, undefined, "FAST");
-
-      const safeName = (fullName === "—" ? "result" : fullName)
-        .replace(/[\\/:*?"<>|]+/g, "_")
-        .trim();
-
-      pdf.save(`Интегральный_тип_личности_${safeName}.pdf`);
-      showToast("PDF скачан");
-    }
-
-    function escapeHtml(s){
-      return String(s)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    // ---------- EVENTS ----------
-    btnC1.addEventListener("click", () => choose(MAP.c1));
-    btnC2.addEventListener("click", () => choose(MAP.c2));
-    btnC3.addEventListener("click", () => choose(MAP.c3));
-
-    btnResetOne.addEventListener("click", resetCurrent);
-    btnPrev.addEventListener("click", prevQuestion);
-
-    restartAll.addEventListener("click", restart);
-    downloadPdf.addEventListener("click", downloadResultPdf);
-
-    document.addEventListener("keydown", (e) => {
-      if (resultView.classList.contains("show")) return;
-
-      if (e.key === "Enter"){
-        e.preventDefault();
-        goNext(); // triggers warning if unanswered
+    // предупреждение при попытке "перейти" без ответа (Enter/→)
+    window.addEventListener('keydown', (e)=>{
+      if(!screenTest.classList.contains('active')) return;
+      if(e.key === 'Enter' || e.key === 'ArrowRight'){
+        if(!answers[idx]){
+          showToast('Выберите один из вариантов ответа');
+          shake(qCard);
+          vibrate([20,30,20]);
+        }
       }
     });
 
-    // ---------- INIT ----------
-    renderQuestion();
+    function showResults(){
+      setScreen(screenResult);
+      resSub.textContent = `Участник: ${fullName()} • Дата: ${nowRuDate()}`;
+
+      pillGrid.innerHTML = '';
+      for(let i=0;i<total;i++){
+        const sym = answers[i] ?? '—';
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+        pill.innerHTML = `<span>${i+1}:</span> <span class="sym">${sym}</span>`;
+        pillGrid.appendChild(pill);
+      }
+
+      buildPdfSheet();
+    }
+
+    btnRestart.addEventListener('click', ()=>{
+      idx = 0;
+      answers = new Array(total).fill(null);
+      setScreen(screenTest);
+      renderQuestion();
+      vibrate(10);
+    });
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function buildPdfSheet(){
+      const date = nowRuDate();
+      const name = fullName();
+
+      let pills = '';
+      for(let i=0;i<total;i++){
+        const sym = answers[i] ?? '—';
+        pills += `<div class="pill"><span>${i+1}:</span> <span class="sym">${sym}</span></div>`;
+      }
+
+      pdfSheet.innerHTML = `
+        <div class="pdfTitle">${escapeHtml(TEST_NAME)} — результат</div>
+        <div class="pdfSub"><b>Участник:</b> ${escapeHtml(name)}<br/><b>Дата:</b> ${escapeHtml(date)}</div>
+        <div class="pillGrid">${pills}</div>
+      `;
+    }
+
+    async function downloadPdf(){
+      btnDownload.disabled = true;
+      buildPdfSheet();
+
+      const hasCanvas = (typeof window.html2canvas === 'function');
+      const hasJsPdf = !!(window.jspdf && window.jspdf.jsPDF);
+
+      if(!hasCanvas || !hasJsPdf){
+        showToast('PDF-модуль недоступен — открою печать');
+        btnDownload.disabled = false;
+        openPrintFallback();
+        return;
+      }
+
+      try{
+        showToast('Формирую PDF…');
+
+        // дождаться шрифтов
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+
+        // дать браузеру отрисовать pdfSheet (2 кадра)
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+        const canvas = await window.html2canvas(pdfSheet, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          logging: false,
+          windowWidth: pdfSheet.scrollWidth,
+          windowHeight: pdfSheet.scrollHeight,
+          scrollX: 0,
+          scrollY: 0
+        });
+
+        if(!canvas || canvas.width === 0 || canvas.height === 0){
+          throw new Error("html2canvas returned empty canvas");
+        }
+
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageW = 210;
+        const pageH = 297;
+        const margin = 10;
+
+        const imgWpx = canvas.width;
+        const imgHpx = canvas.height;
+
+        let drawW = pageW - margin*2;
+        let drawH = (imgHpx * drawW) / imgWpx;
+
+        if(drawH > (pageH - margin*2)){
+          drawH = pageH - margin*2;
+          drawW = (imgWpx * drawH) / imgHpx;
+        }
+
+        const x = (pageW - drawW) / 2;
+        const y = margin;
+
+        pdf.addImage(imgData, 'PNG', x, y, drawW, drawH);
+
+        const d = new Date();
+        const ymd = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const fn = (safeName(firstName.value) || 'Иван').replaceAll(/\s+/g,'_');
+        const ln = (safeName(lastName.value) || 'Иванов').replaceAll(/\s+/g,'_');
+
+        pdf.save(`${TEST_NAME.replaceAll(/\s+/g,'_')}_${ln}_${fn}_${ymd}.pdf`);
+        showToast('Готово');
+      } catch(err){
+        console.error(err);
+        showToast('Не удалось сформировать PDF — открою печать');
+        openPrintFallback();
+      } finally {
+        btnDownload.disabled = false;
+      }
+    }
+
+    function openPrintFallback(){
+      // надежный fallback: печать -> сохранить как PDF
+      const w = window.open('', '_blank');
+      if(!w){
+        showToast('Разреши всплывающие окна для печати');
+        shake(resultCard);
+        return;
+      }
+      const css = document.querySelector('style').innerHTML;
+
+      w.document.open();
+      w.document.write(`
+        <!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8"/>
+            <meta name="viewport" content="width=device-width,initial-scale=1"/>
+            <title>Печать — ${escapeHtml(TEST_NAME)}</title>
+            <style>
+              ${css}
+              body{ background:#fff !important; }
+              .bgGlow,.safe,.app,.screen,.toast{ display:none !important; }
+              .pdfStage{
+                position: static !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: auto !important;
+                min-height: auto !important;
+                padding: 0 !important;
+                border-radius: 0 !important;
+                background:#fff !important;
+                z-index:auto !important;
+              }
+              @page{ size: A4; margin: 10mm; }
+            </style>
+          </head>
+          <body>
+            ${pdfSheet.outerHTML}
+            <script>
+              window.onload = () => setTimeout(() => window.print(), 200);
+            <\/script>
+          </body>
+        </html>
+      `);
+      w.document.close();
+    }
+
+    btnDownload.addEventListener('click', downloadPdf);
+
+  })();
   </script>
 </body>
 </html>
